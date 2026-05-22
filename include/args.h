@@ -1,0 +1,12 @@
+#pragma once
+#include <specseek.h>
+
+typedef struct {
+    int no_ansi;
+    int feature_mode;
+    int feature_count;
+    const char **features;
+} specseek_args;
+
+specseek_args args_parse(int argc, char **argv);
+void args_run_feature_query(const specseek_args *args);
