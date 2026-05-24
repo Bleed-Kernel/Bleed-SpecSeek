@@ -1,35 +1,77 @@
-TARGET      = specseek
-CC         := gcc
-BIN_DIR     = bin
-OBJ_DIR     = $(BIN_DIR)/obj
+ELF_TARGET_64 = specseek
 
-VENDOR_DIR  = ../libspecseek/bin/
+CC 	:= gcc
 
-C_FLAGS     = -Wall -Wextra -Werror -Wno-unused-parameter -m64 \
-              -Iinclude \
-              -I$(VENDOR_DIR)
+ELF_BIN_DIR_64 = bin
+ELF_OBJ_DIR_64 = $(ELF_BIN_DIR_64)/obj
 
-LD_FLAGS    = -m64 -L$(VENDOR_DIR) -lspecseek
+LIB_DIR = sysroot/lib
+LIBC = $(LIB_DIR)/blibc.a
+CRT0 = $(LIB_DIR)/start.o
 
-SRCS        = $(shell find src -name '*.c')
-OBJS        = $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SRCS))
+BLIBC_REPO = https://github.com/Bleed-Kernel/blibc.git
+BLIBC_DIR  ?= ../blibc
 
-all: $(TARGET)
+COMMON_CFLAGS = \
+	-ffreestanding \
+	-fno-stack-protector \
+	-fno-stack-check \
+	-Wall -Wextra \
+	-nostdlib \
+	-no-pie \
+	-m64 \
+	-Iinclude \
+	-Isysroot/include \
+	-Isysroot/libc \
+	-nostdinc
 
-$(TARGET): $(OBJS)
-	@mkdir -p $(BIN_DIR)
-	$(CC) $(OBJS) $(LD_FLAGS) -o $(BIN_DIR)/$(TARGET)
+LDFLAGS = \
+	-static \
+	-nostdlib \
+	-no-pie \
+	-m64 \
+	-Iinclude \
+	-L$(LIB_DIR) \
+	-Isysroot/include \
+	-Isysroot/lib
 
-$(OBJ_DIR)/%.o: src/%.c
+SRCS = $(shell find src -name '*.c')
+ELF_OBJS_64 = $(patsubst src/%.c,$(ELF_OBJ_DIR_64)/%.o,$(SRCS))
+
+all: $(ELF_TARGET_64)
+
+$(ELF_TARGET_64): blibc $(ELF_OBJS_64)
+	@mkdir -p $(ELF_BIN_DIR_64)
+	$(CC) $(LDFLAGS) \
+		-o $(ELF_BIN_DIR_64)/$(ELF_TARGET_64) \
+		$(CRT0) \
+		$(ELF_OBJS_64) \
+		-l:blibc.a \
+		./libspecseek.a
+
+$(ELF_OBJS_64): blibc
+
+$(ELF_OBJ_DIR_64)/%.o: src/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(C_FLAGS) -c $< -o $@
+	$(CC) $(COMMON_CFLAGS) -c $< -o $@
 
-build: $(TARGET)
+blibc:
+	@echo "[BLIBC] Preparing blibc"
+	@if [ ! -d "$(BLIBC_DIR)" ]; then \
+		git clone $(BLIBC_REPO) $(BLIBC_DIR); \
+	fi
+	$(MAKE) -C $(BLIBC_DIR)
 
-run: $(TARGET)
-	./$(BIN_DIR)/$(TARGET)
+	@echo "[BLIBC] Syncing sysroot"
+	@mkdir -p sysroot
+	@cp -r $(BLIBC_DIR)/sysroot/* sysroot/
+
+build: $(ELF_TARGET_64)
 
 clean:
 	rm -rf bin
 
-.PHONY: all build clean
+distclean:
+	rm -rf bin sysroot external
+
+.PHONY: all clean distclean blibc

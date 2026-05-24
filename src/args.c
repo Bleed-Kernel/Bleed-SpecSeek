@@ -209,16 +209,20 @@ static int get_feature_value(const specseek_cpu_features *f, const char *name) {
     return -1;
 }
 
+#ifdef NOT_IMPLEMENTED
 static int stdout_is_tty(void) {
     return isatty(fileno(stdout));
 }
+#endif
 
 specseek_args args_parse(int argc, char **argv) {
     specseek_args result = {0};
 
+    #ifdef NOT_IMPLEMENTED
     if (!stdout_is_tty()) {
         result.no_ansi = 1;
     }
+    #endif
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--no-ansi") == 0) {
