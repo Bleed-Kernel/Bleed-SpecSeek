@@ -358,15 +358,13 @@ int main(int argc, char **argv) {
     specseek_cpu_perfmon perfmon = {0};
     specseek_set_cpuid_perfmon(&perfmon);
 
-    box_top("PERFORMANCE MONITORING");
-    if (perfmon.version == 0) {
-        printf("  %snot available%s\n", g_dim, g_reset);
-    } else {
+    if (perfmon.version != 0){
+        box_top("PERFORMANCE MONITORING");
         kv("Version",          "%u", perfmon.version);
         kv("General counters", "%u (%u-bit wide)",
-           perfmon.general_counter_count, perfmon.general_counter_width);
+        perfmon.general_counter_count, perfmon.general_counter_width);
+        box_bot();
     }
-    box_bot();
 
     // Features  
     specseek_cpu_features features = {0};
