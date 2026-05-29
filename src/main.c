@@ -3,13 +3,14 @@
 #include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <ansii.h>
 #include "args.h"
 
-#define ANSI_RESET   "\033[0m"
-#define ANSI_BOLD    "\033[1m"
-#define ANSI_DIM     "\033[2m"
-#define ANSI_GREEN   "\033[32m"
-#define ANSI_RED     "\033[31m"
+#define ANSI_RESET   RESET
+#define ANSI_BOLD    GRAY_FG
+#define ANSI_DIM     LIGHT_GRAY_FG
+#define ANSI_GREEN   GREEN_FG
+#define ANSI_RED     RED_FG
 
 static const char *g_reset   = ANSI_RESET;
 static const char *g_bold    = ANSI_BOLD;
@@ -25,11 +26,11 @@ static void init_theme(specseek_cpu_vendor_t vendor, int no_ansi) {
         return;
     }
     if (vendor == AMD) {
-        C_PRIMARY = "\033[31m";
-        C_ACCENT  = "\033[91m";
+        C_PRIMARY = RED_FG;
+        C_ACCENT  = RGB_FG(196, 71, 71);
     } else {
-        C_PRIMARY = "\033[34m";
-        C_ACCENT  = "\033[94m";
+        C_PRIMARY = BLUE_FG;
+        C_ACCENT  = CYAN_FG;
     }
 }
 
@@ -104,22 +105,17 @@ void print_cpu_features_minimal(const specseek_cpu_features *f) {
     box_top("FEATURES");
     feat_begin();
     
-    F(sse);      F(sse2);
     F(sse3);     F(ssse3);
     F(sse4_1);   F(sse4_2);
 
     F(avx);      F(avx2);
     F(f16c);     F(fma);
-    F(avx512f);
 
     F(vmx);      F(svm);
     F(hypervisor);
 
     F(nx);       F(smep);
     F(smap);     F(pdpe1gb);
-
-    F(popcnt);   F(bmi1);
-    F(bmi2);     F(lm);
 
     feat_end();
     box_bot();
