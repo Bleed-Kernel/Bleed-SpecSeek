@@ -322,15 +322,13 @@ int main(int argc, char **argv) {
     specseek_cpu_frequency freq = {0};
     specseek_set_cpuid_frequency(&freq);
 
-    box_top("FREQUENCY");
-    if (freq.base_mhz == 0 && freq.max_mhz == 0 && freq.bus_mhz == 0) {
-        printf("  %snot reported by this CPU%s\n", g_dim, g_reset);
-    } else {
+    if (!(freq.base_mhz == 0 && freq.max_mhz == 0 && freq.bus_mhz == 0)){
+        box_top("FREQUENCY");
         kv("Base", "%u MHz", freq.base_mhz);
         kv("Max",  "%u MHz", freq.max_mhz);
         kv("Bus",  "%u MHz", freq.bus_mhz);
+        box_bot();
     }
-    box_bot();
 
     // Hypervisor  
     specseek_cpu_hypervisor hypervisor = {0};
