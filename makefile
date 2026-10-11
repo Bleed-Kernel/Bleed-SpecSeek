@@ -1,6 +1,13 @@
 ELF_TARGET_64 = specseek
 
+UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
+
+ifeq ($(UNAME_S)$(UNAME_M),Darwinarm64)
+CC 	:= x86_64-elf-gcc
+else
 CC 	:= gcc
+endif
 
 ELF_BIN_DIR_64 = bin
 ELF_OBJ_DIR_64 = $(ELF_BIN_DIR_64)/obj
@@ -22,7 +29,7 @@ COMMON_CFLAGS = \
 	-m64 \
 	-Iinclude \
 	-Isysroot/include \
-	-Isysroot/libc \
+	-Isysroot/include/bleed \
 	-nostdinc
 
 LDFLAGS = \
