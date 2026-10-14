@@ -37,6 +37,7 @@ LDFLAGS = \
 	-nostdlib \
 	-no-pie \
 	-m64 \
+	-Wl,-z,noexecstack \
 	-Iinclude \
 	-L$(LIB_DIR) \
 	-Isysroot/include \
